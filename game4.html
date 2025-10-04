@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>小遊戲 4</title>
+
+<style>
+body{
+  margin: 0;
+  background: transparent;
+  font-family: 'Noto Sans TC',sans-serif;
+  color: #fff;
+  text-align: center;
+}
+.stars{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center/cover;
+  animation: scrollStars 60s linear infinite;
+  opacity: .8;
+  z-index: 0;
+}
+@keyframes scrollStars{
+  from { background-position:0 0} to { background-position:0 1000px}
+}
+.hidden {display: none}
+
+button {
+  margin: 1em;
+  padding: .75em 2em;
+  font-size: 1.2em;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: #1e90ff;
+  color: #fff;
+  transition: background .3s;
+}
+button:hover { background:#63b3ed}
+.container {
+  position: relative;
+  z-index: 1;
+  padding: 10vh 2em 2em;
+  max-width: 650px;
+  margin: auto;
+}
+h1 {
+  font-size: 2.3em;
+  margin: .2em 0;
+  color: #00ffcc;
+}
+
+h4 {
+  font-size: 1.4em;
+  margin: 0 0 1em;
+  margin-top: 1em;
+}
+
+.intro {
+  text-align: justify;
+  background: rgba(255,255,255,0.05);
+  padding: 1em;
+  width: fit-content;     /* 核心：自動根據內容寬度調整 */
+  max-width: 100%;        /* 防止太長時超出畫面 */
+  border-radius: 10px;
+  margin: 0 auto 1.5em auto;  /* 水平置中 */
+  margin-bottom: 1.5em;
+  font-size: 1.4em;
+}
+
+/* ===== 遊戲畫面 ===== */
+#game-area {
+  position: relative;
+  width: 100%;
+  height: 90vh;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+}
+.hud {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2em;
+  font-size: 2em;
+  z-index: 3;
+}
+.hud div { white-space:nowrap}
+
+/* 黑洞 & 飛船 */
+.blackhole {
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  transform: translate(-50%,-50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%; /* 將元素變成圓形*/
+  overflow: hidden; /* 隱藏超出圓形的內容，確保圖片只顯示在圓形區域內*/
+  pointer-events: none;
+}
+.blackhole img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 讓圖片以「填滿並裁剪」方式完整覆蓋黑洞範圍，不變形*/
+  animation: spin 4s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg);}}
+.ship {
+  position:absolute;
+  left: 50%;
+  top: 40%;
+  transform:translateX(-50%);
+  width: 80px;
+  height: 80px;
+  pointer-events: none;
+}
+.ship img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain
+}
+
+/* 進度條 */
+#progress-wrapper {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 24px;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+#progress-bar {
+  width: 0;
+  height: 100%;
+  background: #29dfff;
+  transition: width .05s linear;
+}
+
+
+.fuel-status {
+  font-weight: bold;
+  color: #00ccff;
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<!-- 教學 -->
+<div id="tut" class="container">
+  <h1>逃離黑洞</h1>
+  <h4>不小心離黑洞太近，快要掉入事件視界內了！</h4>
+  <p id="fuel-start" class="fuel-status"></p>
+  <div class="intro">
+    <p>瘋狂點擊螢幕，加速推進器！</p>
+    <p>每次 <strong>點擊</strong> 消耗 10 燃料並提升逃脫進度。</p>
+    <p>進度條自動下降，填滿即成功，歸零即被黑洞吞噬！</p>
+  </div>
+  <button onclick="startGame()">開始遊戲</button>
+</div>
+
+<!-- 遊戲 -->
+<div id="game" class="hidden">
+  <div class="hud">
+    <p id="fuel" class="fuel-status"></p>
+  </div>
+  <div id="game-area">
+    <div class="blackhole"><img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/bh_game4.jpg"></div>
+    <div class="ship" id="ship"><img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/ship.jpg"></div>
+
+    <div id="progress-wrapper">
+      <div id="progress-bar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 成功 -->
+<div id="success" class="container hidden">
+  <h1>成功脫離黑洞！</h1>
+  <p class="fuel-status">本關得分：+<span id="score4"></span></p>
+  <p class="fuel-status">目前總分：<span id="score-total"></span></p>
+  <h4>你花費了 <span id="time-used"></span> 秒成功逃脫。</h4>
+  <h4>總共消耗 <span id="fuel-used"></span> 燃料。</h4>
+  <h4>期間太空船吸收了霍金輻射，</h4>
+  <h4>你在逃出後將其轉為能量，</h4>
+  <h4>並利用黑洞的引力加速太空船(重力彈弓效應)，</h4>
+  <h4>相當於回復了 <span id="fuel-bonus"></span> 燃料，剩餘 <span id="fuel-final"></span> 燃料。</h4>
+  <div id="info-link" class="hidden"></div>
+  <button onclick="location.href='https://bonbonchou.github.io/Dora/intro4.html'">繼續航行</button>
+</div>
+
+<!-- 失敗 -->
+<div id="fail" class="container hidden">
+  <h1>大夢初醒！</h1>
+  <h4>你發呆了一下<br>卻彷彿看見太空船墜入黑洞<br>但你沒空理會這個幻覺<br>必須專注在眼前，逃離黑洞！</h4>
+  <button onclick="restartGame()">重新挑戰</button>
+</div>
+
+<script>
+/* ===== 變數 ===== */
+const area      = document.getElementById('game-area');
+const ship      = document.getElementById('ship');
+const barWrap   = document.getElementById('progress-wrapper');
+const bar       = document.getElementById('progress-bar');
+const fuelHUD   = document.getElementById('fuel');
+
+let fuel        = parseInt(localStorage.getItem('fuel') || '0');
+let progress    = 0;         // 0~100
+let playing     = false;
+let startTime    = 0;
+let lastTime    = 0;
+let initialFuel = 0;
+const DECAY_RATE = 12;       // 每秒自動下降百分比
+const GAIN_PER_CLICK = 7;    // 每點增加進度
+let animId;
+let score = parseInt(localStorage.getItem('score')||'0');
+function addScore(v){
+  score += v;
+  localStorage.setItem('score',score);
+}
+
+/* ===== 初始化 ===== */
+window.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById("fuel-start").textContent = `剩餘 ${fuel} 燃料`;
+});
+
+/* ===== 主流程 ===== */
+function startGame(){
+  document.getElementById('tut').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+
+  fuelHUD.textContent = `剩餘 ${fuel} 燃料`;
+  progress = 25;
+  updateBar();
+  startTime = performance.now();
+  lastTime = performance.now();
+  initialFuel = fuel;
+  playing = true;
+
+  area.addEventListener('pointerdown', clickHandler);
+  animId = requestAnimationFrame(loop);
+}
+
+function clickHandler(){
+  if (!playing || fuel <= 0) return;
+  fuel -= 10;
+  fuel = Math.max(fuel, 0);
+  fuelHUD.textContent = `剩餘 ${fuel} 燃料`;
+  progress = Math.min(100, progress + GAIN_PER_CLICK);
+  updateBar();
+  moveShip();
+}
+
+/* ===== loop ===== */
+function loop(now){
+  const dt = (now - lastTime) / 1000;   // 秒
+  lastTime = now;
+
+  const elapsed = (now - startTime) / 1000;
+  const decay = DECAY_RATE + elapsed * 1.5;
+
+  // 自動下降
+  progress -= decay * dt;
+
+  if (progress <= 0){
+    progress = 0;
+    fail();
+    return;
+  }
+  updateBar();
+  moveShip();
+
+  animId = requestAnimationFrame(loop);
+}
+
+/* ===== UI 更新 ===== */
+function updateBar(){
+  bar.style.width = progress + '%';
+  if (progress >= 100){
+    success();
+  }
+}
+
+function moveShip(){
+  // 依進度往上移動一些（最大 40% 高度）
+  const maxRaise = area.clientHeight * 0.4;
+  ship.style.top = (25 + (100 - progress) / 100 * maxRaise / area.clientHeight * 100) + '%';
+}
+
+/* ===== 成功 / 失敗 ===== */
+function success(){
+  playing = false;
+
+  const escapeTime = ((performance.now() - startTime) / 1000).toFixed(1); // 格式化為小數點後 1 位，並回傳一個字串，例如 "3.1"
+  let bonus = Math.round(10000 - escapeTime * 500); // 基礎為 10000，每多花1秒扣500分
+  bonus = Math.max(5000, Math.min(10000, bonus)); // 設定上下限：最少回復5000，最多回復10000
+
+  const used = initialFuel - fuel;
+
+  fuel += bonus;
+
+  localStorage.setItem('fuel', fuel);
+
+  cancelAnimationFrame(animId);
+  area.removeEventListener('pointerdown', clickHandler);
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('success').classList.remove('hidden');
+
+  document.getElementById('fuel-final').textContent = fuel;
+  document.getElementById('time-used').textContent = escapeTime;
+  document.getElementById('fuel-used').textContent = used;
+  document.getElementById('fuel-bonus').textContent = bonus;
+  // 分數統計---------------------------------------------------
+  const bonusScore = Math.max(0, 100 - Math.round(escapeTime * 4));
+  addScore(bonusScore);
+  document.getElementById('score4').textContent = bonusScore;
+  const scoreNow = localStorage.getItem('score')||0;
+  document.getElementById('score-total').textContent = scoreNow;
+
+  // 連結處理---------------------------------------------------
+  const linkArea = document.getElementById("info-link");
+  const link = [
+          { text: "什麼是「灰洞」？這個名詞真的存在嗎？", url: "https://tam.gov.taipei/News_Content.aspx?n=9250C757DF698D9D&sms=52C350C47FE06B81&s=2D7E663912FAB435"},
+          { text: "展示場 2 樓：行星際飛行", url: "https://sites.google.com/view/tamwebtp/%E4%BA%8C%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E5%A4%AA%E9%99%BD%E7%B3%BB/%E8%A1%8C%E6%98%9F%E9%9A%9B%E9%A3%9B%E8%A1%8C"}
+        ]
+  linkArea.innerHTML = "<p>相關內容</p>";
+
+  if (Array.isArray(link)) { // 多個網址
+    link.forEach(l => {
+      linkArea.innerHTML += `<a href="${l.url}" target="_blank" style="display:block; color:#00ccff;">${l.text}</a>`;
+    });
+  }
+  else if (link.url && link.text) { // 單一網址
+    linkArea.innerHTML += `<a href="${link.url}" target="_blank" style="display:block; color:#00ccff;">${link.text}</a>`;
+  }
+  linkArea.classList.remove("hidden");
+}
+
+function fail(){
+  playing = false;
+  cancelAnimationFrame(animId);
+  area.removeEventListener('pointerdown', clickHandler);
+
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('fail').classList.remove('hidden');
+}
+
+/* ===== 重新開始 ===== */
+function restartGame(){
+  document.getElementById('fail').classList.add('hidden');
+  document.getElementById('tut').classList.remove('hidden');
+  // 重設進度條與 UI
+  progress = 25;
+  updateBar();
+
+  // 重設燃料值
+  fuel = parseInt(localStorage.getItem('fuel') || '0');
+  fuelHUD.textContent = `剩餘 ${fuel} 燃料`;
+
+  // 重設時間與狀態
+  startTime = performance.now();
+  lastTime = performance.now();
+  playing = false;
+  initialFuel = 0;
+
+  // 確保不會重複動畫
+  cancelAnimationFrame(animId);
+}
+</script>
+</body>
+</html>
+

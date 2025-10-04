@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>介紹頁面4</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      //background: radial-gradient(ellipse at center, #000 0%, #111 100%);
+      //overflow: hidden;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    .stars {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center center / cover;
+      animation: scrollStars 60s linear infinite;
+      z-index: 0;
+      opacity: 0.8;
+    }
+
+    @keyframes scrollStars {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+
+    .hidden { display: none; }
+    button {
+      margin: 1em;
+      padding: 0.75em 2em;
+      font-size: 1.2em;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: #1e90ff;
+      color: white;
+      transition: background 0.3s ease;
+    }
+    button:hover { background: #63b3ed; }
+
+    .container {
+      position: relative;
+      max-width: 700px;
+      margin: auto;
+      z-index: 1;
+      padding-top: 5vh;
+    }
+
+    img.logo-img {
+      width: 50%;
+      //height: auto;
+      max-width: 600px;
+      margin-top: 0.5em;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+      color: #00ffcc;
+    }
+
+    h4 {
+      font-size: 1.4em;
+      line-height: 1.6;
+      margin-top: -1em;
+      margin-bottom: 1em;
+    }
+
+    h5 {
+      font-size: 1.2em;
+      line-height: 1.2;
+      margin-top: 0em;
+      margin-bottom: 1em;
+      color: #b5fff0;
+    }
+
+    .fuel-status {
+      font-weight: bold;
+      color: #00ccff;
+      margin-top: 0.5em;
+      margin-bottom: 1em;
+    }
+    .credit-status {
+      color: white;
+      font-weight: bold;
+      margin-top: 0.5em;
+      margin-bottom: 1em;
+    }
+
+    #knowledge-title {
+      font-size: 2em;  /* 你可以依需求調整數值 */
+      font-weight: bold; /* 也可以設為 normal, lighter 等 */
+      margin-bottom: 1em;
+      color: #00ffcc;
+      margin-top: 0.5em;
+      display: block;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .intro {
+      margin-bottom: 0em;
+      width: fit-content;     /* 核心：自動根據內容寬度調整 */
+      background: rgba(0,0,0,0.5);
+      padding: 0.5em;
+      border-radius: 10px;
+    }
+
+    #knowledge-text {
+      font-size: 1.5em;
+      line-height: 1.6;
+      margin-bottom: 1em;
+      text-align: justify;
+      padding: 0 1em;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    #info-link {
+      padding: 0 1em;
+      max-width: 700px;
+      margin: auto;
+      //text-align: left;
+      line-height: 1.5em;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+
+  <div class="container">
+    <div id="knowledge-screen">
+      <h3 id="knowledge-title"></h3>
+      <img class="logo-img hidden" id="star-image" src="">
+      <p id="credit" class="credit-status hidden"></p>
+      <p class="fuel-status">利用重力彈弓效應節省了 <span id="fuel-saved"></span> 燃料</p>
+      <p id="fuel" class="fuel-status"></p>
+      <div class="intro">
+        <p id="knowledge-text"></p>
+      </div>
+      <div id="info-link" class="hidden"></div>
+      <button onclick="nextStar()">繼續</button>
+    </div>
+  </div>
+
+  <script>
+    let fuel = parseInt(localStorage.getItem("fuel") || "300"); // 讀取燃料值
+
+    const stars = [
+      {
+        title: "星系",
+        fuelSaved: 4000,
+        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/galaxy.jpg",
+        knowledge: `星系是由恆星、星際物質、和暗物質組成，其中暗物質可能占絕大部分。
+        
+        星系的大小並不一定，有幾十億顆恆星組成的矮星系，也有大至數百兆顆恆星的星系。
+        
+        我們所在的星系，銀河系，則是由 2000 多億顆恆星組成，直徑約 10 萬光年。`,
+        link: 
+          { text: "展示場 3 樓：星系的群聚", url: "https://sites.google.com/view/tamwebtp/%E4%B8%89%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E6%98%9F%E7%B3%BB/%E6%98%9F%E7%B3%BB%E7%9A%84%E7%BE%A4%E8%81%9A"}
+        
+      },
+      {
+        title: "星系團",
+        fuelSaved: 9000,
+        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images//galaxy_clusters.jpg",
+        credit: { text: "Credit: Hubble image of the galaxy cluster Abell 3827", url: "https://www.eso.org/public/images/eso1514a/"},
+        knowledge: `星系在宇宙中並不是隨機分布的，它們之間彼此受重力作用而群聚在一起，形成星系群和星系團，尺度大約數百萬或數千萬光年。
+        
+        星系群中的星系較少，銀河系所在的星系群，稱為本星系群，僅有 50 多個星系。
+        
+        本星系群附近則是室女座星系團，包含超過 2000 個星系，半徑約 600 萬光年。`,
+        link: [
+          { text: "展示場 3 樓：星系的群聚", url: "https://sites.google.com/view/tamwebtp/%E4%B8%89%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E6%98%9F%E7%B3%BB/%E6%98%9F%E7%B3%BB%E7%9A%84%E7%BE%A4%E8%81%9A"},
+          { text: "展示場 3 樓：本星系群", url: "https://sites.google.com/view/tamwebtp/%E4%B8%89%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E6%98%9F%E7%B3%BB/%E6%9C%AC%E6%98%9F%E7%B3%BB%E7%BE%A4"}
+        ]
+      },
+      {
+        title: "超星系團",
+        fuelSaved: 19000,
+        knowledge: `由星系群、星系團聚集而成的結構被稱為超星系團。尺度超過數億光年。
+        
+        我們所處的超星系團叫作室女座超星系團，或本超星系團，包含 100 多個星系團、星系群，直徑 1.1 億光年。
+        
+        而室女座超星系團則是拉尼亞凱亞超星系團的一部份。
+        
+        目前已知宇宙中約有數百萬個超星系團，可見宇宙之大！`,
+        link: [
+          { text: "展示場 3 樓：星系的群聚", url: "https://sites.google.com/view/tamwebtp/%E4%B8%89%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E6%98%9F%E7%B3%BB/%E6%98%9F%E7%B3%BB%E7%9A%84%E7%BE%A4%E8%81%9A"}
+        ]
+      },
+      {
+        title: "長城結構",
+        fuelSaved: 39000,
+        knowledge: `天文學家發現，即使在更大的尺度下，超星系團也不是均勻分布，而是連結成條狀、纖維狀結構，這便是長城結構。
+        
+        長城結構室目前已知尺度最大的宇宙結構，長度約為 100 多萬秒差距( 1 秒差距約為 3.26 光年)。
+        
+        在這些結構之間幾乎沒有星系，這些區域被稱為空洞。`,
+        link: [
+          { text: "展示場 3 樓：星系的群聚", url: "https://sites.google.com/view/tamwebtp/%E4%B8%89%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E6%98%9F%E7%B3%BB/%E6%98%9F%E7%B3%BB%E7%9A%84%E7%BE%A4%E8%81%9A"},
+        ]
+      }
+    ]
+
+    let currentIndex = 0;
+
+    window.addEventListener("DOMContentLoaded", () => { // 畫面載入完成後執行
+      fuel -= 1000;
+      renderStar(currentIndex);
+    });
+
+    function renderStar(index) {
+      const star = stars[index];
+
+      document.getElementById("knowledge-title").innerHTML = star.title;
+      document.getElementById("knowledge-text").innerHTML = formatknowledge(star.knowledge);
+      const img = star && star.image;
+      const imgArea = document.getElementById("star-image");
+      if (img) {
+        imgArea.src = star.image;
+        imgArea.classList.remove("hidden");
+      } else {
+        imgArea.innerHTML = "";
+        imgArea.classList.add("hidden");
+      }
+
+      // 顯示燃料
+      document.getElementById("fuel").textContent = `消耗 1000 燃料，剩餘 ${fuel} 燃料`;
+      document.getElementById('fuel-saved').textContent = star.fuelSaved;
+
+      // 引用
+      const creditArea = document.getElementById("credit");
+      const credit = star && star.credit;
+      
+      if (credit) {
+        creditArea.innerHTML = `<a href="${credit.url}" target="_blank" style="display:block; color:#00ccff;">${credit.text}</a>`;
+        creditArea.classList.remove("hidden");
+      } else {
+        creditArea.innerHTML = "";
+        creditArea.classList.add("hidden");
+      }
+
+      // 連結處理
+      const linkArea = document.getElementById("info-link");
+      const info = stars[currentIndex];
+      const link = info && info.link;
+      if (link) {
+        linkArea.innerHTML = "<p>相關內容</p>";
+
+        if (Array.isArray(link)) { // 多個網址
+          link.forEach(l => {
+            linkArea.innerHTML += `<a href="${l.url}" target="_blank" style="display:block; color:#00ccff;">${l.text}</a>`;
+          });
+        }
+        else if (link.url && link.text) { // 單一網址
+          linkArea.innerHTML += `<a href="${link.url}" target="_blank" style="display:block; color:#00ccff;">${link.text}</a>`;
+        }
+        linkArea.classList.remove("hidden");
+      } else { // 沒有網址
+        linkArea.innerHTML = "";
+        linkArea.classList.add("hidden");
+      }
+    }
+
+    function nextStar() {     
+      localStorage.setItem("fuel", fuel);
+
+      currentIndex++;
+      if (currentIndex >= stars.length) {
+        location.href="https://bonbonchou.github.io/Dora/ending.html";
+      } else {
+        fuel -= 1000;
+        if (fuel < 0) fuel = 0; // 避免負數
+        renderStar(currentIndex);
+      }
+    }
+
+    function formatknowledge(knowledge) {
+  		return knowledge
+      .replace(/\n/g, '<br>') // 若你 intro 裡是用換行符號斷行，也可以加這行
+      .replace(/\s{2,}/g, ''); // 清除多餘空白
+  	}
+  </script>
+
+</body>
+</html>

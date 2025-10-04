@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>小遊戲2</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    .stars {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center / cover;
+      animation: scrollStars 60s linear infinite;
+      z-index: 0;
+      opacity: 0.8;
+    }
+
+    @keyframes scrollStars {
+      from { background-position: 0 0; }
+      to   { background-position: 0 1000px; }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    button {
+      margin: 1em;
+      padding: 0.75em 2em;
+      font-size: 1.2em;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: #1e90ff;
+      color: white;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #63b3ed;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      padding: 10vh 2em 2em;
+      max-width: 650px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 2.4em;
+      margin: 0.2em 0;
+      color: #00ffcc;
+    }
+
+    h4 {
+      font-size: 1.6em;
+      margin: 0 0 1em;
+    }
+
+    .intro {
+      text-align: justify;
+      background: rgba(255,255,255,0.05);
+      padding: 1em;
+      width: fit-content;     /* 核心：自動根據內容寬度調整 */
+      max-width: 100%;        /* 防止太長時超出畫面 */
+      border-radius: 10px;
+      margin: 0 auto 1.5em auto;  /* 水平置中 */
+      margin-bottom: 1.5em;
+      font-size: 1em;
+    }
+
+    #game-area {
+      position: relative;
+      width: 100%;
+      height: 90vh;
+      overflow: hidden;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .hud {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2em;
+      font-size: 2.2em;
+      z-index: 3;
+    }
+
+    .hud div {
+      white-space: nowrap;
+    }
+
+    .ship {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      bottom: 0%;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: left 0.15s;
+      z-index: 2;
+    }
+
+    .ship img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .bullet {
+      position: absolute;
+      width: 6px;
+      height: 30px;
+      background: #29dfff;
+      pointer-events: none;
+    }
+
+    .item {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .power {
+      width: 60px;
+      height: 60px;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    @keyframes explode {
+      to {
+        transform: scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    .fuel-status {
+      font-weight: bold;
+      color: #00ccff;
+      margin-top: 0.5em;
+      margin-bottom: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <!-- 教學 -->
+  <div id="tut" class="container">
+    <h1>清除障礙物</h1>
+    <h4>進入小行星帶，清除障礙物！</h4>
+    <p id="fuel" class="fuel-status"></p>
+    <div class="intro">
+      <p>拖曳／點擊移動飛船，自動射擊粉碎小行星！</p>
+      <p>🛢️ 擊碎不同小行星增加不同燃料（+1 / +5 / +10 / +100）</p>
+      <p>💥 碰到小行星即失敗</p>
+    </div>
+    <button onclick="startGame()">開始遊戲</button>
+  </div>
+
+  <!-- 遊戲畫面 -->
+  <div id="game" class="hidden">
+    <div class="hud">
+      <div>燃料：<span id="fuel-num">0</span></div>
+    </div>
+    <div id="game-area">
+      <div id="ship" class="ship">
+        <img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/ship.jpg">
+      </div>
+    </div>
+  </div>
+
+  <!-- 成功 -->
+  <div id="success" class="container hidden">
+    <h1>成功通過小行星帶！</h1>
+    <p class="fuel-status">本關得分：+<span id="score2"></span></p>
+    <p class="fuel-status">目前總分：<span id="score-total"></span></p>
+    <h4>剩餘 <span id="fuel-final"></span> 燃料</h4>
+    <button onclick="location.href='https://bonbonchou.github.io/Dora/intro2.html'">繼續航行</button>
+  </div>
+
+  <!-- 失敗 -->
+  <div id="fail" class="container hidden">
+    <h1>大夢初醒！</h1>
+    <h4>你發呆了一下<br>卻彷彿看見小行星撞上太空船<br>但你沒空理會這個幻覺<br>必須專注在眼前，通過小行星帶！</h4>
+    <button onclick="restartGame()">再次挑戰</button>
+  </div>
+
+  <script>
+    const area = document.getElementById('game-area');
+    let shipEl = document.getElementById('ship');
+    const fuelEl = document.getElementById('fuel-num');
+
+    let fuel = parseInt(localStorage.getItem("fuel") || "0");
+    let fuelEarned  = 0;
+    
+    let items = [];
+    
+    let spawnTimer;
+    let animId;
+    let spawnDelay = 900;
+    let bigMeteorSpawned = false;
+    
+    let playing = false;
+    let shipTargetX = null;
+    let shipAnimId = null;
+
+    // 小隕石尺寸
+    const smallTypes = [
+      { val: 1,  size: 50 },
+      { val: 5,  size: 90 },
+      { val: 10, size: 130 }
+    ];
+    // 子彈系統 ------------------------------------------- 
+    let bullets = [];
+    let fireInterval = 500;
+    let fireTimer;
+    let multiForward = 0;
+    let multiDiagonal = 0;
+
+    // 分數計算 ------------------------------------------- 
+    let score = parseInt(localStorage.getItem('score')||'0');
+    let localScore = 0;
+    function addScore(v){
+      score += v;
+      localScore += v;
+    }
+
+
+
+    // 初始化 ---------------------------------------------------------------- 
+    window.addEventListener("DOMContentLoaded", () => { // 畫面載入完成後執行
+      document.getElementById("fuel").textContent = `剩餘 ${fuel} 燃料`;
+      //localStorage.setItem("fuel",0) // 測試用!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    });
+
+    // 主流程控制
+    function startGame() {
+      document.getElementById("tut").classList.add("hidden");
+      document.getElementById("game").classList.remove("hidden");
+      playing = true;
+      fuelEarned = 0;
+      fuelEl.textContent = fuel;
+
+      score = parseInt(localStorage.getItem('score')||'0');
+      localScore = 0;
+
+      fireTimer = setInterval(shoot, fireInterval);
+      spawnTimer = setInterval(() => {
+        if (!bigMeteorSpawned) {
+          spawnSmall();
+          spawnDelay = Math.max(200, spawnDelay - 15);
+        }
+      }, spawnDelay);
+
+      animId = requestAnimationFrame(loop);
+    }
+
+    // 控制飛船拖曳
+    area.addEventListener('pointerdown', moveShip);
+    area.addEventListener('pointermove', e => playing && moveShip(e));
+
+    function moveShip(e) {
+      const rect = area.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      shipTargetX = x * 100;
+      if (!shipAnimId) smoothMove();
+    }
+
+    function smoothMove() {
+      if (shipTargetX === null) return;
+
+      const currentLeft = parseFloat(shipEl.style.left || "0");
+      const diff = shipTargetX - currentLeft;
+
+      if (Math.abs(diff) < 0.5) {
+        shipEl.style.left = shipTargetX + "%";
+        shipAnimId = null;
+        return;
+      }
+
+      shipEl.style.left = (currentLeft + diff * 0.15) + "%";
+      shipAnimId = requestAnimationFrame(smoothMove);
+    }
+
+    
+
+    // 子彈生成（連發、多發）
+    function shoot() {
+      const bullet_speed = -10;
+      // 單發最少發一發，從1開始算
+
+      // 如果 multiForward 是奇數：中間一發 + 左右對稱發
+      // 如果 multiForward 是偶數：沒有中間發，只有左右對稱發
+
+      const count = multiForward + 1 || 1;  // 預設1發
+      const spacing = 15;               // 每發子彈左右間隔距離（可調）
+
+      if (count % 2 === 1) {
+        // 奇數發，先射中間一發
+        spawnBullet(0, bullet_speed, -20);
+      }
+
+      // 左右對稱射擊（排除中間發）
+      const sideCount = Math.floor(count / 2);
+
+      for (let i = 1; i <= sideCount; i++) {
+        spawnBullet(-spacing * i, bullet_speed, -20); // 左邊子彈
+        spawnBullet(spacing * i, bullet_speed, -20);  // 右邊子彈
+      }
+      // ----------------------------------------------------------------
+      if (multiDiagonal) {
+        const vx = 1;  // 控制子彈水平移動速度，值越大越斜
+        for (let i = 1; i <= multiDiagonal; i++) {
+          spawnBullet(0, bullet_speed, 0,  -vx * i); // 左斜
+          spawnBullet(0, bullet_speed, 0,  vx * i);
+        }
+      }
+    }
+
+    function spawnBullet(offsetX, vy, extraY = 0, vx = 0) {
+      if (bullets.length > 150) return;  // 限制同時存在的子彈數量避免lag
+      const b = document.createElement('div');
+      b.className = 'bullet';
+      // 根據飛船（shipEl）的位置 + offsetX（左右偏移）
+      b.style.left = (shipEl.offsetLeft +  offsetX) + 'px'; 
+      b.style.top = (shipEl.offsetTop + extraY) + 'px';
+      // 🔁 加旋轉角度
+      if (vx !== 0) {
+        const angle = Math.atan2(vx, -vy) * (180 / Math.PI); // Math.atan2(y, x) = (x,y) 在直角坐標中與 x 軸正向夾角
+        b.style.transform = `rotate(${angle}deg)`;
+      }
+      area.appendChild(b);
+      bullets.push({ el: b, vy, vx });
+    }
+
+    // 小隕石生成
+    function spawnSmall() {
+      const type = smallTypes[Math.floor(Math.random() * smallTypes.length)];
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.dataset.type = 'small';
+      div.dataset.val = type.val;
+      div.style.width = type.size + 'px';
+      div.style.height = type.size + 'px';
+      div.innerHTML = `<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/asteroid.jpg">`;
+      // 10% 機率使用 vy = 10，否則為 1 ~ 3 的範圍
+      const vy = Math.random() < 0.1 ? 10 : 1 + Math.random() * 2;
+      randomSpawn(div, vy);
+    }
+
+    // 大隕石生成
+    function spawnBig() {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.dataset.type = 'big';
+      div.dataset.hp = 300;
+      div.style.width = '640px';
+      div.style.height = '640px';
+      div.innerHTML = `<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/asteroid_big.jpg">`;
+      // 直接指定為畫面中間
+      div.style.position = 'absolute';
+      div.style.left = '50%';
+      div.style.top = '-480px';
+      div.style.transform = 'translateX(-50%)';
+
+      area.appendChild(div);
+      // 建立一個浮點 y 座標（對應 top: -480px）
+      const obj = {
+        el: div,
+        vy: 0.5,
+        y: -480  // 👈 初始位置，之後每幀都加 vy
+      };
+
+      items.push(obj);
+    }
+
+    // 隨機位置生成
+    function randomSpawn(el, vy) {
+      el.style.left = Math.random() * (area.offsetWidth - 100) + 'px';
+      el.style.top = '-100px';
+      area.appendChild(el);
+      items.push({ el, vy });
+    }
+
+    // 增益道具圖片
+    const powerImgs = {
+      rapid: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/continuous_arrow.jpg",
+      forward: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/double_arrow.jpg",
+      diag: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/inclined_arrow.jpg"
+    };
+
+    function spawnPower(x, y) {
+      // 可選的道具種類，根據目前狀態來決定
+      const availableKinds = [];
+
+      if (fireInterval > 340) availableKinds.push('rapid');
+      if (multiForward < 4) availableKinds.push('forward');
+      if (multiDiagonal < 3) availableKinds.push('diag');
+
+      // 如果都已達上限，則不生成任何道具
+      if (availableKinds.length === 0) return;
+      // 隨機從可用的種類中選一個
+      const kind = availableKinds[Math.floor(Math.random() * availableKinds.length)];
+
+      const p = document.createElement('div');
+      p.className = 'power';
+      p.dataset.type = 'power';
+      p.dataset.kind = kind;
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      p.innerHTML = `<img src="${powerImgs[kind]}" style="width:150%; height:150%">`;
+      area.appendChild(p);
+      items.push({ el: p, vy: 5 });
+    }
+
+    // 主遊戲迴圈
+    function loop() {
+      // 子彈移動
+      bullets.forEach(b => {
+        b.el.style.top = (b.el.offsetTop + b.vy) + 'px';
+        b.el.style.left = (b.el.offsetLeft + b.vx) + 'px';
+      });
+
+      bullets = bullets.filter(b => {
+        if (b.el.offsetTop < 50) {
+          b.el.remove();
+          return false; // 從 bullets 陣列中刪除
+        }
+        return true;
+      });
+
+      // 隕石與道具移動與碰撞處理
+      items.forEach(obj => {
+        if (obj.el.dataset.type === 'big') {
+          obj.y += obj.vy;                     // 用浮點數更新位置
+          obj.el.style.top = obj.y + 'px';     // 將浮點 y 寫入 style.top
+        } else {
+          obj.el.style.top = (obj.el.offsetTop + obj.vy) + 'px'; // 其他物件照舊
+        }
+
+        // 撿道具
+        if (obj.el.dataset.type === 'power' && hitTest(obj.el, shipEl)) {
+          applyPower(obj.el.dataset.kind);
+          obj.el.remove();
+          obj.vy = 0;
+        }
+
+        // 太空船撞隕石
+        if (
+          (obj.el.dataset.type === 'small' || obj.el.dataset.type === 'big') &&
+          !obj.exploding && // 爆炸中不處理碰撞
+          hitTest(obj.el, shipEl)
+        ) {
+          endFail();
+        }
+
+        // 子彈撞隕石
+        bullets.forEach(b => {
+          if (obj.el.dataset.type === 'power') return;  // 🔒 忽略道具
+          if (!hitTest(b.el, obj.el)) return;
+          if (hitTest(b.el, obj.el)) {
+            if (obj.el.dataset.type === 'small') { // 小隕石
+              if (!bigMeteorSpawned) { // 只在大隕石未出現前加燃料
+                let val = parseInt(obj.el.dataset.val);
+
+                // ❗ 調整 val，避免超過 500
+                if (fuelEarned + val > 500) {
+                  val = 500 - fuelEarned;
+                }
+
+                fuelEarned += val;
+                fuel += val;
+                fuelEl.textContent = fuel;
+
+                addScore(1.1); // 每擊碎一顆 +1.1 分
+              }             
+
+              if (Math.random() < 0.2) {
+                spawnPower(obj.el.offsetLeft, obj.el.offsetTop);
+              }
+
+              obj.el.style.animation = 'explode .3s forwards';
+              setTimeout(() => obj.el.remove(), 300);
+              obj.vy = 9999; // 移除控制
+
+            } else if (obj.el.dataset.type === 'big') { // 大隕石
+              let hp = --obj.el.dataset.hp;
+              if (hp === 0) {
+                fuel += 100;
+                fuelEl.textContent = fuel;
+
+                obj.exploding = true; // 標記這顆隕石正在爆炸
+                obj.vy = 0; // 停止移動
+                obj.el.style.animation = 'explode .5s forwards';
+                setTimeout(() => victory(), 500);
+              }
+            }
+
+            b.el.remove();
+            b.vy = 0;
+          }
+        });
+      });
+      /* 清理落出畫面 */
+      items = items.filter(o => {
+        if (o.vy === 0) return false;
+        if (o.el.offsetTop > area.offsetHeight + 30) {
+          o.el.remove();
+          return false;
+        }
+        return true;
+      });
+
+      if (playing) {
+        animId = requestAnimationFrame(loop);
+      }
+    }
+
+    // 碰撞判定
+    function hitTest(a, b) {
+      const ar = a.getBoundingClientRect();
+      const br = b.getBoundingClientRect();
+      return !(
+        ar.right < br.left ||
+        ar.left  > br.right ||
+        ar.bottom < br.top ||
+        ar.top > br.bottom
+      );
+    }
+
+    // 增益效果套用
+    function applyPower(kind) {
+      if (kind === 'rapid') {
+        fireInterval = Math.max(340, fireInterval - 80);
+        clearInterval(fireTimer);
+        fireTimer = setInterval(shoot, fireInterval);
+      } else if (kind === 'forward') {
+        multiForward = Math.min(4, multiForward + 1);
+      } else if (kind === 'diag') {
+        multiDiagonal = Math.min(3, multiDiagonal + 1);;
+      }
+    }
+
+    function checkBigMeteor() {
+      if (fuel >= 500 && !bigMeteorSpawned) {
+        bigMeteorSpawned = true;
+        clearInterval(spawnTimer);
+        spawnBig();
+      }
+    }
+
+    function victory() {
+      playing = false;
+      clearInterval(spawnTimer);
+      clearInterval(fireTimer);
+      cancelAnimationFrame(animId);
+
+      localStorage.setItem("fuel", fuel);
+      document.getElementById("game").classList.add("hidden");
+      document.getElementById("success").classList.remove("hidden");
+      document.getElementById("fuel-final").textContent = fuel;
+      // 分數統計-------------------------------------------------------
+      score = Math.round(score);
+      localScore = Math.round(localScore);
+      localStorage.setItem('score',score);
+
+      document.getElementById('score2').textContent = localScore;
+      document.getElementById('score-total').textContent = score;
+    }
+
+    function endFail() {
+      playing = false;
+      clearInterval(spawnTimer);
+      clearInterval(fireTimer);
+      cancelAnimationFrame(animId);
+
+      document.getElementById("game").classList.add("hidden");
+      document.getElementById("fail").classList.remove("hidden");
+    }
+
+    function restartGame() {
+      document.getElementById("fail").classList.add("hidden");
+      document.getElementById("tut").classList.remove("hidden");
+
+      fuel = parseInt(localStorage.getItem("fuel") || "0");
+      fuelEarned = 0;
+      fireInterval = 400;
+      multiForward = 0;
+      multiDiagonal = 0;
+      spawnDelay = 900;
+      bigMeteorSpawned = false;
+      bullets = [];
+      items = [];
+
+      clearInterval(fireTimer);
+      clearInterval(spawnTimer);
+      cancelAnimationFrame(animId);
+
+      // 重設遊戲區域與飛船
+      const area = document.getElementById("game-area");
+      area.innerHTML = `
+        <div id="ship" class="ship">
+          <img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/ship.jpg">
+        </div>
+      `;
+
+      // 重新取得 shipEl 與綁定移動事件
+      shipEl = document.getElementById("ship");
+      shipTargetX = null;
+      shipAnimId = null;
+
+      area.addEventListener('pointerdown', moveShip);
+      area.addEventListener('pointermove', e => playing && moveShip(e));
+
+      document.getElementById("fuel-num").textContent = fuel;
+      startGame();
+    }
+
+
+
+    // 大隕石觸發條件監聽
+    setInterval(() => {
+      if (fuelEarned >= 500 && !bigMeteorSpawned) {
+        bigMeteorSpawned = true;
+        clearInterval(spawnTimer);  // 停產小隕石
+        spawnBig();
+      }
+    }, 400);
+
+  </script>
+</body>
+</html>
+

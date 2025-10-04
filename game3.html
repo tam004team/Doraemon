@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>小遊戲3</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    .stars {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center center / cover;
+      animation: scrollStars 60s linear infinite;
+      z-index: 0;
+      opacity: 0.8;
+    }
+
+    @keyframes scrollStars {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+
+    .hidden { display: none; }
+
+    button {
+      margin: 1em;
+      padding: 0.75em 2em;
+      font-size: 1.2em;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: #1e90ff;
+      color: white;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #63b3ed;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      padding: 10vh 2em 2em;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 0.2em;
+      color: #00ffcc;
+    }
+
+    h4 {
+      font-size: 1.8em;
+      margin-top: 0;
+      margin-bottom: 1em;
+    }
+
+    h5 {
+      font-size: 1.1em;
+      color: #b5fff0;
+      margin-bottom: 1em;
+    }
+
+    .intro {
+      text-align: justify;
+      background: rgba(255,255,255,0.05);
+      padding: 1em;
+      width: fit-content;     /* 核心：自動根據內容寬度調整 */
+      max-width: 100%;        /* 防止太長時超出畫面 */
+      border-radius: 10px;
+      margin: 0 auto 1.5em auto;  /* 水平置中 */
+      margin-bottom: 1.5em;
+      font-size: 1.4em;
+    }
+
+    .rules p {
+      text-align: left;
+      line-height: 1.6em;
+    }
+
+    .color-dot {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .blue { background: #4ec3ff; }
+    .gold { background: #ffd24e; }
+    .red { background: #ff5b5b; }
+
+    #game-area {
+      position: relative;
+      width: 100%;
+      height: 90vh;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    #lanes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 10%;
+      background: linear-gradient(to right,
+          rgba(255, 255, 255, 0.04) 0%,
+          rgba(255, 255, 255, 0.04) 49.5%,
+          rgba(0, 255, 255, 0.2) 49.5%,
+          rgba(0, 255, 255, 0.2) 50.5%,
+          rgba(255, 255, 255, 0.04) 50.5%,
+          rgba(255, 255, 255, 0.04) 100%
+      );
+      z-index: 0;
+      pointer-events: none;
+    }
+
+
+    .hud {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2em;
+      font-size: 1.5em;
+      z-index: 3;
+    }
+    .hud > div {
+      white-space: nowrap;
+      min-width: 120px;
+    }
+
+    /* 生命顯示 */
+    .heart {
+      color:#ff7676;
+      font-size:1.1em;
+      margin-left:2px
+    }
+    /* 太空船 & 掉落物 -------------------------------------------------------- */
+    .spaceship {
+      position:absolute;
+      width:120px;
+      height:120px;
+      bottom:0%;
+      left:25%;
+      transform:translateX(-50%);
+      z-index:2;
+      transition:left .15s;
+    }
+    .spaceship img {
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      pointer-events:none;
+    }
+
+    .item {
+      position:absolute;
+      width:75px;
+      height:75px;
+      border-radius:50%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-weight:bold;
+      user-select:none;
+      pointer-events:none
+    }
+    .item.fuel {
+      background:#4ec3ff;
+      box-shadow:0 0 10px #4ec3ff
+    }
+    .item.fuel img {
+      width:150%;
+      height:150%;
+      object-fit:contain;
+    }
+    .item.bomb {
+      background:#ff4d4d;
+      box-shadow:0 0 12px #ff4d4d
+    }
+    .item.bomb img {
+      width:80%;
+      height:80%;
+      object-fit:contain;
+    }
+    /* 彈出動畫 */
+    @keyframes pop{
+      to {
+        transform:scale(1.5);opacity:0
+      }
+    }
+
+    .fuel-status {
+      font-weight: bold;
+      color: #00ccff;
+      margin-top: 0.5em;
+      margin-bottom: 1em;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+
+  <!-- Tutorial ------------------------------------------------------------ -->
+  <div id="tutorial-screen" class="container">
+    <h1>補充燃料</h1>
+    <h4>即將離開太陽系，需補充燃料！</h4>
+    <p id="fuel" class="fuel-status"></p>
+    <div class="intro">
+      <p>點擊螢幕切換左右，撿燃料避流星體！</p>
+      <p>燃料　+100<br>流星體　-1 ❤️</p>
+      <p>❤️歸零，遊戲結束</p>
+    </div>
+    <button onclick="startGame()">開始遊戲</button>
+  </div>
+
+  <!-- Game ---------------------------------------------------------------- -->
+  <div id="game-screen" class="hidden">
+    <div class="hud">
+      <div>燃料：<span id="fuel-num">0</span></div>
+      <div>生命：<span id="life-num"></span></div>
+    </div>
+    <div id="game-area">
+      <div id="lanes"></div>
+      <div id="ship" class="spaceship">
+        <img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/ship.jpg">
+      </div>
+    </div>
+  </div>
+
+  <!-- End ----------------------------------------------------------------- -->
+  <div id="end-screen" class="container hidden">
+    <h1>補給完成！</h1>
+    <p class="fuel-status">本關得分：+<span id="score3"></span></p>
+    <p class="fuel-status">目前總分：<span id="score-total"></span></p>
+    <h4>剩餘 <span id="final-fuel"></span> 燃料</h4>
+    <button onclick="location.href='https://bonbonchou.github.io/Dora/intro3.html'">出發！</button>
+  </div>
+
+  <!-- Fail ---------------------------------------------------------------- -->
+  <div id="fail-screen" class="container hidden">
+    <h1>燃料不足！</h1>
+    <h4>請重新補給。</h4>
+    <button onclick="restartGame()">重新開始</button>
+  </div>
+
+  <script>
+    /* 全局常數 -------------------------------------------------------------- */
+    const LANE_LEFT = 'left', LANE_RIGHT = 'right';
+    const ITEM_INTERVAL = 900;        // 生成頻率 (ms)
+    const ITEM_FALL_SPEED = 4;        // 初始落下速度 (px/帧)
+    const SPEED_GAIN = 0.002;         // 每帧加速度
+    const FUEL_GAIN = 200;
+    const LIFE_START = 3;
+
+    /* DOM ------------------------------------------------------------------ */
+    const tut = document.getElementById('tutorial-screen');
+    const game = document.getElementById('game-screen');
+    const end  = document.getElementById('end-screen');
+    const fail = document.getElementById('fail-screen');
+    const fuelEl = document.getElementById('fuel-num');
+    const lifeEl = document.getElementById('life-num');
+    const finalFuel = document.getElementById('final-fuel');
+    const area = document.getElementById('game-area');
+    const ship = document.getElementById('ship');
+
+    /* 狀態 ------------------------------------------------------------------ */
+    let lane = LANE_LEFT;
+    let fuel = parseInt(localStorage.getItem('fuel')||'0');
+    let life = LIFE_START;
+    let items = [];
+    let spawnTimer, animId;
+    let currentSpeed = ITEM_FALL_SPEED;
+    let spawnDelay = 1000; // 初始間隔
+
+    let surviveStart = 0;
+    let score = parseInt(localStorage.getItem('score')||'0');
+    function addScore(v){
+      score += v;
+      localStorage.setItem('score',score);
+    }
+
+    /* 初始化 ---------------------------------------------------------------- */
+    window.addEventListener("DOMContentLoaded", () => { // 畫面載入完成後執行
+      document.getElementById("fuel").textContent = `剩餘 ${fuel} 燃料`;
+    });
+
+    function startGame(){
+      tut.classList.add('hidden');
+      game.classList.remove('hidden');
+      fuelEl.textContent = fuel;
+      renderLife();
+      lane = LANE_LEFT;
+      ship.style.left = '25%';
+      spawnLoop();
+      area.addEventListener('click', switchLane);
+      animId = requestAnimationFrame(update);
+
+      setInterval(() => {
+        currentSpeed += 0.15;  // 每秒加速
+      }, 1000);
+
+      surviveStart = Date.now();
+    }
+
+    function spawnLoop() {
+      spawnItem();
+      spawnDelay = Math.max(spawnDelay - 5, 230); // 每次生成間隔縮短，最低 230 ms
+      spawnTimer = setTimeout(spawnLoop, spawnDelay);
+    }
+    
+
+    /* 生成物件 -------------------------------------------------------------- */
+    function spawnItem(){
+      const type = Math.random() < 0.3 ? 'bomb' : 'fuel';
+      const div = document.createElement('div');
+      div.className = `item ${type}`;
+      div.dataset.type = type;
+      div.dataset.lane = Math.random() < 0.5 ? LANE_LEFT : LANE_RIGHT;
+      div.style.left = div.dataset.lane === LANE_LEFT ? '25%' : '75%'; // 左車道，物品的 left 屬性為 25%：右車道，則為 75%
+      div.style.transform = 'translateX(-50%)';
+      div.style.top = '-80px';
+      div.style.backgroundSize='contain';
+      div.innerHTML = type==='fuel'
+        ? '<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/battery.png">'
+        : '<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/asteroid_big.jpg">';
+      area.appendChild(div);
+      items.push({el:div, y:-80, speed:currentSpeed}); // el: 物品的 DOM 元素 (div)
+    }
+
+    /* 遊戲主循環 ------------------------------------------------------------ */
+    function update(){
+      items.forEach ( obj=>{
+        obj.speed += SPEED_GAIN;
+        obj.y += obj.speed;
+        obj.el.style.top = obj.y+'px';
+
+        // 碰撞檢測：同車道且距離 < 60px
+        if (
+          obj &&
+          obj.el &&
+          obj.el.dataset &&
+          obj.el.dataset.collected !== "true" &&
+          obj.el.dataset.lane === lane &&
+          obj.y > area.offsetHeight * 0.8 - 60
+        ) {
+          obj.el.dataset.collected = "true";
+          handleHit(obj.el.dataset.type);
+          obj.el.style.animation = 'pop .3s forwards';
+        }
+
+        // 移出畫面刪除
+        if ( obj.y > area.offsetHeight + 10 ) {
+          obj.el.remove();
+        }
+      });
+      items = items.filter ( i => i. y <= area.offsetHeight + 10 );
+      if ( life > 0 ) {
+        animId = requestAnimationFrame(update);
+      }
+    }
+
+    /* 事件處理 -------------------------------------------------------------- */
+    function switchLane(){
+      lane = lane === LANE_LEFT ? LANE_RIGHT : LANE_LEFT;
+      ship.style.left = lane === LANE_LEFT? '25%' : '75%';
+    }
+
+    function handleHit(type){
+      if (type==='fuel'){
+        fuel += FUEL_GAIN;
+        fuelEl.textContent=fuel;
+      } else { // bomb
+        life--;
+        renderLife();
+        if (life <= 0) gameOver();
+      }
+    }
+
+    function renderLife(){
+      if (life >= 0){
+        lifeEl.innerHTML = '❤️'.repeat(life);
+      }
+    }
+
+    /* 結束流程 -------------------------------------------------------------- */
+    function gameOver(){
+      clearInterval(spawnTimer);
+      cancelAnimationFrame(animId);
+      area.removeEventListener('click', switchLane);
+      // 清場
+      items.forEach(obj => obj.el.remove());
+      items=[];
+      game.classList.add('hidden');
+
+      if (fuel >= 3300) { // 成功
+        // 分數統計-----------------------------------------
+        const surviveTime = (Date.now() - surviveStart)/1000; // 秒
+        const bonusScore = Math.round(surviveTime * 2);
+        addScore(bonusScore); // 每秒 +2 分
+        document.getElementById('score3').textContent = bonusScore;
+        const scoreNow = localStorage.getItem('score')||0;
+        document.getElementById('score-total').textContent = scoreNow;
+
+
+        localStorage.setItem('fuel', fuel);
+        finalFuel.textContent = fuel;
+        end.classList.remove('hidden');
+      } else { // 失敗
+        fail.classList.remove('hidden');
+      }
+    }
+
+    function restartGame(){
+      fail.classList.add('hidden');
+      currentSpeed = ITEM_FALL_SPEED;
+      spawnDelay = 900;
+      fuel = parseInt(localStorage.getItem('fuel')||'0');
+      life = 3;
+      startGame();
+    }
+  </script>
+
+</body>
+</html>
+

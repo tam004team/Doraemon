@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>介紹頁面1</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      //background: radial-gradient(ellipse at center, #000 0%, #111 100%);
+      //overflow: hidden;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    .stars {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center center / cover;
+      animation: scrollStars 60s linear infinite;
+      z-index: 0;
+      opacity: 0.8;
+    }
+
+    @keyframes scrollStars {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+
+    .hidden { display: none; }
+    button {
+      margin: 1em;
+      padding: 0.75em 2em;
+      font-size: 1.2em;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: #1e90ff;
+      color: white;
+      transition: background 0.3s ease;
+    }
+    button:hover { background: #63b3ed; }
+
+    .container {
+      position: relative;
+      max-width: 700px;
+      margin: auto;
+      z-index: 1;
+      padding-top: 5vh;
+    }
+
+    img.logo-img {
+      width: 50%;
+      //height: auto;
+      max-width: 600px;
+      margin-top: 0.5em;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+    }
+
+    h4 {
+      font-size: 1.4em;
+      line-height: 1.6;
+      margin-top: -1em;
+      margin-bottom: 1em;
+      color: #00ffcc;
+    }
+
+    h5 {
+      font-size: 1.2em;
+      line-height: 1.2;
+      margin-top: 0em;
+      margin-bottom: 1em;
+      color: #b5fff0;
+    }
+
+    .fuel-status {
+      font-weight: bold;
+      color: #00ccff;
+      margin-top: 0.5em;
+      margin-bottom: 1em;
+    }
+
+    #knowledge-title {
+      font-size: 2em;  /* 你可以依需求調整數值 */
+      font-weight: bold; /* 也可以設為 normal, lighter 等 */
+      margin-bottom: 1em;
+      color: #00ffcc;
+      margin-top: 0.5em;
+      display: block;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .intro {
+      margin-bottom: 0em;
+      width: fit-content;     /* 核心：自動根據內容寬度調整 */
+      background: rgba(0,0,0,0.5);
+      padding: 0.5em;
+      border-radius: 10px;
+    }
+
+    #knowledge-text {
+      font-size: 1.5em;
+      line-height: 1.6;
+      margin-bottom: 1em;
+      text-align: justify;
+      padding: 0 1em;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    #info-link {
+      padding: 0 1em;
+      max-width: 700px;
+      margin: auto;
+      //text-align: left;
+      line-height: 1.5em;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+
+  <div class="container">
+    <div id="knowledge-screen">
+      <h3 id="knowledge-title"></h3>
+      <img class="logo-img" id="star-image" src="">
+      <p id="fuel" class="fuel-status"></p>
+      <div class="intro">
+        <p id="knowledge-text"></p>
+      </div>
+      <div id="info-link" class="hidden"></div>
+      <button onclick="nextStar()">繼續</button>
+    </div>
+  </div>
+
+  <script>
+    let fuel = parseInt(localStorage.getItem("fuel") || "300"); // 讀取燃料值
+
+    const stars = [
+      {
+        title: "太陽",
+        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/sun.jpg",
+        knowledge: `太陽大約在 46 億年前形成，它的半徑是地球的 100 多倍，它的質量更占了太陽系總質量接近 99.9%。
+        
+        根據科學家的理論與觀測，再過大約 55 億年，太陽就會膨脹成紅巨星，半徑變成原本的 260 倍，到時候水星、金星、地球都會被太陽吞噬。`,
+        link: [
+          { text: "展示場 2 樓：太陽的多重面貌", url: "https://sites.google.com/view/tamwebtp/%E4%BA%8C%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E6%81%86%E6%98%9F/%E5%A4%AA%E9%99%BD%E7%9A%84%E5%A4%9A%E9%87%8D%E9%9D%A2%E8%B2%8C"},
+          { text: "展示場 2 樓：太陽表面活動", url: "https://sites.google.com/view/tamwebtp/%E4%BA%8C%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E6%81%86%E6%98%9F/%E5%A4%AA%E9%99%BD%E8%A1%A8%E9%9D%A2%E6%B4%BB%E5%8B%95"}
+        ]
+      },
+      {
+        title: "水星",
+        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images//mercury.webp",
+        knowledge: `水星是太陽系中離太陽最近、最小的行星，甚至比一些衛星還小。由於缺乏大氣，水星的日夜溫差非常大，白天溫度高達 400 度，晚上則是零下 180 度。
+        
+        根據信使號的觀測，水星有著全球性磁場，磁場強度是地球的 1%。磁場的來源推測是其內核富含鐵，詳細結果需要等待貝皮可倫坡號確認。`,
+        link: [
+          { text: "NASA：Mercury", url: "https://science.nasa.gov/mercury/facts/"},
+          { text: "展示場 2 樓：太陽系結構", url: "https://sites.google.com/view/tamwebtp/%E4%BA%8C%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E5%A4%AA%E9%99%BD%E7%B3%BB/%E5%A4%AA%E9%99%BD%E7%B3%BB%E7%B5%90%E6%A7%8B"},
+          { text: "展示場 2 樓：太陽系內天體的定義和成員", url: "https://sites.google.com/view/tamwebtp/%E4%BA%8C%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E5%A4%AA%E9%99%BD%E7%B3%BB/%E5%A4%AA%E9%99%BD%E7%B3%BB%E5%85%A7%E5%A4%A9%E9%AB%94%E7%9A%84%E5%AE%9A%E7%BE%A9%E5%92%8C%E6%88%90%E5%93%A1"},
+          { text: "天文新知：太陽系內可能擁有鑽石層的行星", url: "https://tam.gov.taipei/News_Content.aspx?n=EF86D8AF23B9A85B&sms=F32C4FF0AC5C2801&s=D2A26E8BF434225E"},
+          { text: "天文新知：貝皮可倫坡號第6次飛掠水星的3張最佳影像", url: "https://tam.gov.taipei/News_Content.aspx?n=EF86D8AF23B9A85B&sms=F32C4FF0AC5C2801&s=F8DBCA7D9D43C951"}
+        ]
+      },
+      {
+        title: "金星",
+        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images//venus.jpg",
+        knowledge: `金星是離太陽第二近的行星，它跟地球差不多大，質量是地球的 0.8 倍，半徑是地球的 0.95倍。
+        
+        金星有著濃厚的大氣層，大氣壓力是地球的 90 倍，大氣中有 96% 是二氧化碳，使溫室效應非常嚴重，所以金星表面溫度甚至比水星還高。
+        
+        根據破曉號的觀測，金星大氣中還有硫酸形成的硫酸雲，所以金星下雨的話會下硫酸雨！`,
+        link: [
+          { text: "NASA：Venus", url: "https://science.nasa.gov/venus/venus-facts/"},
+          { text: "展示場 2 樓：太陽系結構", url: "https://sites.google.com/view/tamwebtp/%E4%BA%8C%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E5%A4%AA%E9%99%BD%E7%B3%BB/%E5%A4%AA%E9%99%BD%E7%B3%BB%E7%B5%90%E6%A7%8B"},
+          { text: "展示場 2 樓：太陽系內天體的定義和成員", url: "https://sites.google.com/view/tamwebtp/%E4%BA%8C%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E5%A4%AA%E9%99%BD%E7%B3%BB/%E5%A4%AA%E9%99%BD%E7%B3%BB%E5%85%A7%E5%A4%A9%E9%AB%94%E7%9A%84%E5%AE%9A%E7%BE%A9%E5%92%8C%E6%88%90%E5%93%A1"},
+          { text: "天文新知：金星上可能有生命嗎？從雲層中再次觀測到磷化氫", url: "https://tam.gov.taipei/News_Content.aspx?n=EF86D8AF23B9A85B&sms=F32C4FF0AC5C2801&s=08A02B9FA085A117"},
+          { text: "天文新知：NASA研究揭示金星地殼驚人秘密", url: "https://tam.gov.taipei/News_Content.aspx?n=EF86D8AF23B9A85B&sms=F32C4FF0AC5C2801&s=F0494914063D6733"}
+        ]
+      },
+      {
+        title: "地球",
+        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images//earth.jpg",
+        knowledge: `地球是離太陽第三近的行星，也是一顆美麗且有著生命的行星。
+        
+        科學家到目前為止都還沒在地球以外的地方發現過生命，更別提智慧文明了。不過，天文學家德瑞克提出了「德瑞克方程式」來估計銀河系中可能存在的高等智慧文明數量`,
+        link: [
+          { text: "展示場 1 樓：地球", url: "https://sites.google.com/view/tamwebtp/%E4%B8%80%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E5%9C%B0%E7%90%83"},
+          { text: "展示場 3 樓：德瑞克方程式", url: "https://sites.google.com/view/tamwebtp/%E4%B8%89%E6%A8%93%E5%B1%95%E7%A4%BA%E5%8D%80_1/%E6%8E%A2%E7%B4%A2%E5%A4%96%E6%98%9F%E7%94%9F%E5%91%BD/%E5%BE%B7%E7%91%9E%E5%85%8B%E6%96%B9%E7%A8%8B%E5%BC%8F"}
+        ]
+      },
+      {
+        title: "火星",
+        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/mars.jpg",
+        knowledge: `火星是離太陽第四近的行星，也是繼月球後，科學家探索的下一個目標。
+        
+        隨著阿提米絲計劃的推進，人類將首先在月球上建立基地。這不僅是為了科學研究，更是為了登陸火星，打造人類未來可能的地外家園！`,
+        link: [
+          { text: "NASA：Mars", url: "https://science.nasa.gov/mars/facts/"},
+          { text: "NASA：阿提米絲計畫", url: "https://www.nasa.gov/reference/artemis-i-2/"},
+          { text: "天文新知：阿提米絲任務將迎來太空團隊的新紀元", url: "https://tam.gov.taipei/News_Content.aspx?n=EF86D8AF23B9A85B&sms=F32C4FF0AC5C2801&s=4206B349FF3C2D45"},
+          { text: "天文新知：我們對火星為何呈紅色的理解錯了嗎？", url: "https://tam.gov.taipei/News_Content.aspx?n=EF86D8AF23B9A85B&sms=F32C4FF0AC5C2801&s=A732AA24CE9BDCD2"},
+          { text: "天文新知：火星地下有海洋？最新研究再度支持地下水庫存在", url: "https://tam.gov.taipei/News_Content.aspx?n=EF86D8AF23B9A85B&sms=F32C4FF0AC5C2801&s=882F57BFC2FAA7C4"},
+          { text: "天文新知：在火星地表首度觀測到可見光波段的綠色極光", url: "https://tam.gov.taipei/News_Content.aspx?n=EF86D8AF23B9A85B&sms=F32C4FF0AC5C2801&s=D694D552027F0520"}
+        ]
+      }
+    ]
+
+    let currentIndex = 0;
+
+    window.addEventListener("DOMContentLoaded", () => { // 畫面載入完成後執行
+      fuel -= 50;
+      renderStar(currentIndex);
+    });
+
+    function renderStar(index) {
+      const star = stars[index];
+
+      document.getElementById("knowledge-title").textContent = star.title;
+      document.getElementById("knowledge-text").innerHTML = formatknowledge(star.knowledge);
+      document.getElementById("star-image").src = star.image;
+
+      // 顯示燃料
+      document.getElementById("fuel").textContent = `消耗 50 燃料，剩餘 ${fuel} 燃料`;
+
+      // 連結處理
+      const linkArea = document.getElementById("info-link");
+      const info = stars[currentIndex];
+      const link = info && info.link;
+      if (link) {
+        linkArea.innerHTML = "<p>相關內容</p>";
+
+        if (Array.isArray(link)) { // 多個網址
+          link.forEach(l => {
+            linkArea.innerHTML += `<a href="${l.url}" target="_blank" style="display:block; color:#00ccff;">${l.text}</a>`;
+          });
+        }
+        else if (link.url && link.text) { // 單一網址
+          linkArea.innerHTML += `<a href="${link.url}" target="_blank" style="display:block; color:#00ccff;">${link.text}</a>`;
+        }
+        linkArea.classList.remove("hidden");
+      } else { // 沒有網址
+        linkArea.innerHTML = "";
+        linkArea.classList.add("hidden");
+      }
+    }
+
+    function nextStar() {     
+      localStorage.setItem("fuel", fuel);
+
+      currentIndex++;
+      if (currentIndex >= stars.length) {
+        location.href="https://bonbonchou.github.io/Dora/game2.html";
+      } else {
+        fuel -= 50;
+        if (fuel < 0) fuel = 0; // 避免負數
+        renderStar(currentIndex);
+      }
+    }
+
+    function formatknowledge(knowledge) {
+  		return knowledge
+      .replace(/\n/g, '<br>') // 若你 intro 裡是用換行符號斷行，也可以加這行
+      .replace(/\s{2,}/g, ''); // 清除多餘空白
+  	}
+  </script>
+
+</body>
+</html>
