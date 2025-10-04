@@ -17,7 +17,7 @@
       position: fixed;
       width: 100%;
       height: 100%;
-      background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center / cover;
+      background: url('https://raw.githubusercontent.com/tam004team/Doraemon/main/images/stars.jpeg') repeat-y center / cover;
       animation: scrollStars 60s linear infinite;
       z-index: 0;
       opacity: 0.8;
@@ -191,7 +191,7 @@
     </div>
     <div id="game-area">
       <div id="ship" class="ship">
-        <img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/ship.jpg">
+        <img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/ship.jpg">
       </div>
     </div>
   </div>
@@ -202,7 +202,7 @@
     <p class="fuel-status">本關得分：+<span id="score2"></span></p>
     <p class="fuel-status">目前總分：<span id="score-total"></span></p>
     <h4>剩餘 <span id="fuel-final"></span> 燃料</h4>
-    <button onclick="location.href='https://bonbonchou.github.io/Dora/intro2.html'">繼續航行</button>
+    <button onclick="location.href='https://tam004team.github.io/Doraemon/intro2.html'">繼續航行</button>
   </div>
 
   <!-- 失敗 -->
@@ -369,9 +369,9 @@
       div.dataset.val = type.val;
       div.style.width = type.size + 'px';
       div.style.height = type.size + 'px';
-      div.innerHTML = `<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/asteroid.jpg">`;
+      div.innerHTML = `<img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/asteroid.jpg">`;
       // 10% 機率使用 vy = 10，否則為 1 ~ 3 的範圍
-      const vy = Math.random() < 0.1 ? 10 : 1 + Math.random() * 2;
+      const vy = Math.random() < 0.1 ? 7 : 1 + Math.random() * 2;
       randomSpawn(div, vy);
     }
 
@@ -383,7 +383,7 @@
       div.dataset.hp = 300;
       div.style.width = '640px';
       div.style.height = '640px';
-      div.innerHTML = `<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/asteroid_big.jpg">`;
+      div.innerHTML = `<img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/asteroid_big.jpg">`;
       // 直接指定為畫面中間
       div.style.position = 'absolute';
       div.style.left = '50%';
@@ -411,9 +411,9 @@
 
     // 增益道具圖片
     const powerImgs = {
-      rapid: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/continuous_arrow.jpg",
-      forward: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/double_arrow.jpg",
-      diag: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/inclined_arrow.jpg"
+      rapid: "https://raw.githubusercontent.com/tam004team/Doraemon/main/images/continuous_arrow.jpg",
+      forward: "https://raw.githubusercontent.com/tam004team/Doraemon/main/images/double_arrow.jpg",
+      diag: "https://raw.githubusercontent.com/tam004team/Doraemon/main/images/inclined_arrow.jpg"
     };
 
     function spawnPower(x, y) {
@@ -437,7 +437,7 @@
       p.style.top = y + 'px';
       p.innerHTML = `<img src="${powerImgs[kind]}" style="width:150%; height:150%">`;
       area.appendChild(p);
-      items.push({ el: p, vy: 5 });
+      items.push({ el: p, vy: 4 });
     }
 
     // 主遊戲迴圈
@@ -627,7 +627,7 @@
       const area = document.getElementById("game-area");
       area.innerHTML = `
         <div id="ship" class="ship">
-          <img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/ship.jpg">
+          <img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/ship.jpg">
         </div>
       `;
 
@@ -657,4 +657,3 @@
   </script>
 </body>
 </html>
-
