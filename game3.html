@@ -17,7 +17,7 @@
       position: fixed;
       width: 100%;
       height: 100%;
-      background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center center / cover;
+      background: url('https://raw.githubusercontent.com/tam004team/Doraemon/main/images/stars.jpeg') repeat-y center center / cover;
       animation: scrollStars 60s linear infinite;
       z-index: 0;
       opacity: 0.8;
@@ -239,7 +239,7 @@
     <div id="game-area">
       <div id="lanes"></div>
       <div id="ship" class="spaceship">
-        <img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/ship.jpg">
+        <img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/ship.jpg">
       </div>
     </div>
   </div>
@@ -250,7 +250,7 @@
     <p class="fuel-status">本關得分：+<span id="score3"></span></p>
     <p class="fuel-status">目前總分：<span id="score-total"></span></p>
     <h4>剩餘 <span id="final-fuel"></span> 燃料</h4>
-    <button onclick="location.href='https://bonbonchou.github.io/Dora/intro3.html'">出發！</button>
+    <button onclick="location.href='https://tam004team.github.io/Doraemon/intro3.html'">出發！</button>
   </div>
 
   <!-- Fail ---------------------------------------------------------------- -->
@@ -338,8 +338,8 @@
       div.style.top = '-80px';
       div.style.backgroundSize='contain';
       div.innerHTML = type==='fuel'
-        ? '<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/battery.png">'
-        : '<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/asteroid_big.jpg">';
+        ? '<img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/battery.png">'
+        : '<img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/asteroid_big.jpg">';
       area.appendChild(div);
       items.push({el:div, y:-80, speed:currentSpeed}); // el: 物品的 DOM 元素 (div)
     }
@@ -439,4 +439,3 @@
 
 </body>
 </html>
-
