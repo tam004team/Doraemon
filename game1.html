@@ -17,7 +17,7 @@
       position: fixed;
       width: 100%;
       height: 100%;
-      background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center center / cover;
+      background: url('https://raw.githubusercontent.com/tam004team/Doraemon/main/images/stars.jpeg') repeat-y center center / cover;
       animation: scrollStars 60s linear infinite;
       z-index: 0;
       opacity: 0.8;
@@ -236,7 +236,7 @@
     <p class="fuel-status">本關得分：+<span id="score1"></span></p>
     <p class="fuel-status">目前總分：<span id="score-total"></span></p>
     <h4>你獲得了 <span id="final-fuel"></span> 燃料！</h4>
-    <button onclick="location.href='https://bonbonchou.github.io/Dora/intro1.html'">出發！</button>
+    <button onclick="location.href='https://tam004team.github.io/Doraemon/intro1.html'">出發！</button>
   </div>
 
   <!-- Not Enough Fuel -->
@@ -248,7 +248,7 @@
 
   <script>
     const SPAWN_INTERVAL = 700;
-    let spawnDelay = 700; // 初始間隔
+    let spawnDelay = 1000; // 初始間隔
     const GAME_DURATION  = 20000;
     let fuel = 0, timeLeft = 20, gameTimer, spawnTimer;
 
@@ -288,7 +288,7 @@
 
     function spawnLoop() {
       spawnObject();
-      spawnDelay = Math.max(spawnDelay - 5, 300); // 每次生成間隔縮短，最低 300 ms
+      spawnDelay = Math.max(spawnDelay - 5, 500); // 每次生成間隔縮短，最低 500 ms
       spawnTimer = setTimeout(spawnLoop, spawnDelay);
     }
 
@@ -324,15 +324,15 @@
       if (rand < 0.5) {
         obj.className = 'orb blue';
         obj.dataset.value = 10;
-        obj.innerHTML = '<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/battery.png">';
+        obj.innerHTML = '<img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/battery.png">';
       } else if (rand < 0.7) {
         obj.className = 'orb gold';
         obj.dataset.value = 50;
-        obj.innerHTML = '<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/lightning.png">';
+        obj.innerHTML = '<img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/lightning.png">';
       } else {
         obj.className = 'bomb';
         obj.dataset.value = -100;
-        obj.innerHTML = '<img src="https://raw.githubusercontent.com/BonBonChou/Dora/main/images/bomb.png">';
+        obj.innerHTML = '<img src="https://raw.githubusercontent.com/tam004team/Doraemon/main/images/bomb.png">';
       }
       const size = 75;
       const x = Math.random() * (area.clientWidth - size);
@@ -342,7 +342,7 @@
       obj.addEventListener('click', collect, false);
       obj.addEventListener('touchstart', collect, false);
       area.appendChild(obj);
-      setTimeout(() => { obj.remove() }, 800);
+      setTimeout(() => { obj.remove() }, 1500);
     }
 
     function collect(e) {
