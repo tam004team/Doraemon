@@ -19,7 +19,7 @@
       position: fixed;
       width: 100%;
       height: 100%;
-      background: url('https://raw.githubusercontent.com/BonBonChou/Dora/main/images/stars.jpeg') repeat-y center center / cover;
+      background: url('https://raw.githubusercontent.com/tam004team/Doraemon/main/images/stars.jpeg') repeat-y center center / cover;
       animation: scrollStars 60s linear infinite;
       z-index: 0;
       opacity: 0.8;
@@ -158,7 +158,7 @@
       {
         title: "星系",
         fuelSaved: 4000,
-        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images/galaxy.jpg",
+        image: "https://raw.githubusercontent.com/tam004team/Doraemon/main/images/galaxy.jpg",
         knowledge: `星系是由恆星、星際物質、和暗物質組成，其中暗物質可能占絕大部分。
         
         星系的大小並不一定，有幾十億顆恆星組成的矮星系，也有大至數百兆顆恆星的星系。
@@ -171,7 +171,7 @@
       {
         title: "星系團",
         fuelSaved: 9000,
-        image: "https://raw.githubusercontent.com/BonBonChou/Dora/main/images//galaxy_clusters.jpg",
+        image: "https://raw.githubusercontent.com/tam004team/Doraemon/main/images//galaxy_clusters.jpg",
         credit: { text: "Credit: Hubble image of the galaxy cluster Abell 3827", url: "https://www.eso.org/public/images/eso1514a/"},
         knowledge: `星系在宇宙中並不是隨機分布的，它們之間彼此受重力作用而群聚在一起，形成星系群和星系團，尺度大約數百萬或數千萬光年。
         
@@ -276,7 +276,7 @@
 
       currentIndex++;
       if (currentIndex >= stars.length) {
-        location.href="https://bonbonchou.github.io/Dora/ending.html";
+        location.href="https://tam004team.github.io/Doraemon/ending.html";
       } else {
         fuel -= 1000;
         if (fuel < 0) fuel = 0; // 避免負數
